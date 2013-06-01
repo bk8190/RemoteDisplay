@@ -8,6 +8,7 @@ Based on Example RF Radio Ping Pair by J. Coliz <maniacbug@ymail.com>
  version 2 as published by the Free Software Foundation.
  */
 
+#include <stdlib.h>
 #include <SPI.h>
 #include <cstring>
 #include "nRF24L01.h"
@@ -44,8 +45,8 @@ role_e role;
 
 
 #define PAYLOAD_SIZE 32
-uint8_t tx_buf[PAYLOAD_SIZE+1];
-uint8_t rx_buf[PAYLOAD_SIZE+1];
+char tx_buf[PAYLOAD_SIZE+1];
+char rx_buf[PAYLOAD_SIZE+1];
 
 typedef struct
 {
@@ -60,6 +61,8 @@ tx_payload_t;
 typedef enum 
 {
   CMD_ECHO         = 'e',
+  CMD_HEARTBEAT    = 'h',
+
   CMD_TEXT         = 't', //argc 1: row [a,b]  argc2: col [a,p]  argstring: text (max 16)
   CMD_QUICKTEXT    = 'u',
   CMD_CLEAR        = 'c', //argc: row [a,b] (default clear all)
@@ -67,7 +70,7 @@ typedef enum
   CMD_DISPLAY      = 'd', 
   CMD_SCROLL       = 's', //argc: mode [a,b]
   CMD_BUTTON       = 'b',
-  CMD_TIMEOUT      = 't'
+  CMD_TIMEOUT      = 't',
 } 
 command_t;
 
@@ -143,7 +146,7 @@ void loop(void)
 }
 
 
-#define MOBILE_SLEEP_INTERVAL 500//3000
+#define MOBILE_SLEEP_INTERVAL 3000
 #define MOBILE_WAKE_INTERVAL 500
 
 #define BASE_RX_TIMEOUT 500

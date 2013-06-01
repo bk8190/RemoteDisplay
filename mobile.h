@@ -1,9 +1,11 @@
 
+#define MOBILE_CELL_VOLTAGE_PIN 0
 
 typedef struct
 {
 	Adafruit_RGBLCDShield lcd;
 	bool needs_tx;
+	float last_voltage;
 } 
 mobile_t;
 mobile_t mobile;
@@ -11,6 +13,7 @@ mobile_t mobile;
 void mobile_rx();
 void mobile_process_command();
 void mobile_delay();
+void mobile_read_voltage();
 
 void setup_mobile()
 {
@@ -25,6 +28,8 @@ void loop_mobile()
 {    
 	int i;
 	bool done = false;
+
+	mobile_read_voltage();
 
 	// if there is data ready
 	if ( radio.available() )
@@ -78,21 +83,31 @@ void mobile_rx()
 
 }
 
+void mobile_read_voltage()
+{
+	char tmp[10];
+	int val = analogRead(MOBILE_CELL_VOLTAGE_PIN);
+	mobile.last_voltage = ((float) val) * (5.0 / 1024);
+	dtostrf(mobile.last_voltage, 1, 2, tmp);
+	printf("v = %s\n", tmp);
+}
+
 void mobile_cmd_backlight();
 void mobile_cmd_text();
 void mobile_cmd_clear();
 void mobile_cmd_scroll();
 void mobile_cmd_quicktext();
+void mobile_cmd_heartbeat();
 
 void mobile_process_command()
 {
 	int i;
-	printf("Got payload \"%s\"...\r\n", rx_buf);
+	printf("Got payload \"%s\"\r\n", rx_buf);
 
 	switch (rx_buf[1])
 	{
-		case CMD_BACKLIGHT:
-			mobile_cmd_backlight();
+		case CMD_HEARTBEAT:
+			mobile_cmd_heartbeat();
 			break;
 		case CMD_TEXT:
 			mobile_cmd_text();
@@ -100,9 +115,13 @@ void mobile_process_command()
 		case CMD_QUICKTEXT:
 			mobile_cmd_quicktext();
 			break;
+		case CMD_BACKLIGHT:
+			mobile_cmd_backlight();
+			break;
 		case CMD_CLEAR:
 			mobile_cmd_clear();
 			break;
+
 		//case CMD_SCROLL:
 		//	mobile_cmd_scroll();
 		//	break;
@@ -226,4 +245,20 @@ void mobile_cmd_scroll()
 			mobile.lcd.noAutoscroll();
 			break;
 	}
+}
+
+void mobile_cmd_heartbeat()
+{
+	printf("Heartbeat\n");
+	int pos=0;
+
+	memset(rx_buf, 0, PAYLOAD_SIZE+1);
+	tx_buf[pos++] = '<';
+	tx_buf[pos++] = 'h';
+
+	dtostrf(mobile.last_voltage, 1, 2, &tx_buf[pos]);
+	pos += 4;
+
+	tx_buf[pos++] = '>';
+	mobile.needs_tx = true;
 }

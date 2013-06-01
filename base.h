@@ -91,7 +91,7 @@ void base_tx()
 	int try_num;
 
 
-	Serial.print("Now sending \"");
+	Serial.print("Sending \"");
 	for (i=0; i<PAYLOAD_SIZE; i++)
 	{
 		b = tx_buf[i];
@@ -116,13 +116,13 @@ void base_tx()
 
 	if (ok)
 	{
-		printf("send attempt %u: YOLO\n\r", try_num);
+		//printf("send attempt %u: YOLO\n\r", try_num);
 		base_reset_parsing();
 		memset(tx_buf, 0, sizeof(tx_buf));
 	}
 	else
 	{
-		printf("overall failed. <t>\n\r");
+		printf("Send failed. <t>\n\r");
 	}
 }
 
