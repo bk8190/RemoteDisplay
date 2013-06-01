@@ -61,6 +61,7 @@ typedef enum
 {
   CMD_ECHO         = 'e',
   CMD_TEXT         = 't', //argc 1: row [a,b]  argc2: col [a,p]  argstring: text (max 16)
+  CMD_QUICKTEXT    = 'u',
   CMD_CLEAR        = 'c', //argc: row [a,b] (default clear all)
   CMD_BACKLIGHT    = 'l',
   CMD_DISPLAY      = 'd', 
@@ -142,7 +143,7 @@ void loop(void)
 }
 
 
-#define MOBILE_SLEEP_INTERVAL 3000
+#define MOBILE_SLEEP_INTERVAL 500//3000
 #define MOBILE_WAKE_INTERVAL 500
 
 #define BASE_RX_TIMEOUT 500

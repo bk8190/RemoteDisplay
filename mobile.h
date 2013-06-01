@@ -82,6 +82,7 @@ void mobile_cmd_backlight();
 void mobile_cmd_text();
 void mobile_cmd_clear();
 void mobile_cmd_scroll();
+void mobile_cmd_quicktext();
 
 void mobile_process_command()
 {
@@ -95,6 +96,9 @@ void mobile_process_command()
 			break;
 		case CMD_TEXT:
 			mobile_cmd_text();
+			break;
+		case CMD_QUICKTEXT:
+			mobile_cmd_quicktext();
 			break;
 		case CMD_CLEAR:
 			mobile_cmd_clear();
@@ -163,6 +167,26 @@ void mobile_cmd_text()
 
 	printf("Text line %u, col %u: <%s>\n", line, col, text);
 	mobile.lcd.setCursor(col, line);
+	mobile.lcd.print(text);
+}
+
+void mobile_cmd_quicktext()
+{
+	char text[PAYLOAD_SIZE+1];
+	memset(text, 0, PAYLOAD_SIZE+1);
+
+	int i;
+	for (i=2; i<PAYLOAD_SIZE; i++)
+	{
+		if (rx_buf[i] == '>')
+			break;
+		text[i-2] = rx_buf[i];
+	}
+
+	printf("Text: <%s>\n", text);
+	mobile.lcd.setCursor(0, 0);
+	mobile.lcd.print("                ");
+	mobile.lcd.setCursor(0, 0);
 	mobile.lcd.print(text);
 }
 
