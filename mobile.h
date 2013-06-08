@@ -1,7 +1,9 @@
 
-#define MOBILE_CELL_VOLTAGE_PIN 5
+const int MOBILE_CELL_VOLTAGE_PIN = 5;
 
-#define MOBILE_WAKE_PIN 2
+const int MOBILE_WAKE_PIN = 2;
+
+const int MOBILE_LOW_VOLTAGE = 3.4;
 
 const int isr = 3;
 
@@ -75,9 +77,9 @@ void setup_mobile()
 	delay(500);
 	mobile.lcd.setBacklight(0);
 	mobile.needs_send_status = false;
-	mobile.needs_tx = false;
-	mobile.override_light = false;
-	mobile.interrupted = false;
+	mobile.needs_tx          = false;
+	mobile.override_light    = false;
+	mobile.interrupted       = false;
 	pinMode(led_pin, OUTPUT);
 	delay(2000);
 }
@@ -133,15 +135,13 @@ void mobile_rx()
 			strncpy(&tx_buf[2], status_msgs[mobile.needs_send_status], 16);
 			tx_buf[17] = '>';
 			mobile.needs_tx = true;
-			mobile.needs_send_status = false;
+			mobile.needs_send_status = 0;
 			done = true;
 		}
 		else
 		{
-			//Serial.print("Reading payload\n");
 			// Fetch the payload, and see if this was the last one.
 			done = radio.read(&rx_buf, PAYLOAD_SIZE);
-
 			mobile_process_command();
 		}
 
@@ -151,8 +151,9 @@ void mobile_rx()
 		//	mobile_cmd_heartbeat();
 		}
 
-		if (mobile.needs_tx)
+		if (mobile.needs_tx) {
 			mobile_tx_buffer();
+		}
 
 		delay(200);
 	}
@@ -164,6 +165,7 @@ void mobile_tx_buffer()
 	int try_num;
 	bool ok;
 	delay(100);
+
 	// Send the response back.
 	for (try_num=1; try_num<MOBILE_MAX_TX_RETRIES; try_num++)
 	{
@@ -229,7 +231,7 @@ void mobile_read_voltage()
 	mobile.lcd.setCursor(12,1);
 	mobile.lcd.print(tmp);
 
-	if (mobile.last_voltage < 3.9 && mobile.last_voltage > 3.0)
+	if (mobile.last_voltage < MOBILE_LOW_VOLTAGE && mobile.last_voltage > 3.0)
 	{
 		mobile.lcd.setBacklight(col_off);
 		
