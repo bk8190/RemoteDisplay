@@ -166,6 +166,7 @@ void mobile_rx()
 */
 		if (mobile.needs_tx)
 		{
+			delay(100);
 			// Send the response back.
 			for (try_num=1; try_num<MOBILE_MAX_TX_RETRIES; try_num++)
 			{
@@ -181,6 +182,7 @@ void mobile_rx()
 			mobile.needs_tx = false;
 			printf("Sent response, try %u.\n\r", try_num);
 		}
+		delay(200);
 	}
 
 }
@@ -235,7 +237,7 @@ void mobile_read_voltage()
 
 	if (mobile.last_voltage < 3.9 && mobile.last_voltage > 3.0)
 	{
-		mobile.lcd.setBacklight(0x0);
+		mobile.lcd.setBacklight(col_off);
 		
 		mobile.lcd.setCursor(0, 0);
 		mobile.lcd.print("BATTERY LOW,");
@@ -245,7 +247,7 @@ void mobile_read_voltage()
 		radio.powerDown();
 
 		delay(1000);
-		detachInterrupt(0);
+		detachInterrupt(isr);
 		//LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
 	}
 }
@@ -253,7 +255,6 @@ void mobile_read_voltage()
 void mobile_cmd_backlight();
 void mobile_cmd_text();
 void mobile_cmd_clear();
-void mobile_cmd_scroll();
 void mobile_cmd_quicktext();
 void mobile_cmd_heartbeat();
 
@@ -280,10 +281,6 @@ void mobile_process_command()
 			mobile_cmd_clear();
 			break;
 
-		//case CMD_SCROLL:
-		//	mobile_cmd_scroll();
-		//	break;
-
 		default:
 			for (i=0; i<PAYLOAD_SIZE; i++) {
 				tx_buf[i] = rx_buf[i];
@@ -298,31 +295,31 @@ void mobile_cmd_backlight()
 	printf("Setting backlight '%c'\n", rx_buf[2]);
 	switch (rx_buf[2])
 	{
-		case 'r': //red
-			mobile.lcd.setBacklight(0x1);
+		case 'r':
+			mobile.lcd.setBacklight(col_red); 
 			break;
-		case 'y': //yellow
-			mobile.lcd.setBacklight(0x3);
+		case 'y':
+			mobile.lcd.setBacklight(col_yellow);
 			break;
-		case 'g': //green
-			mobile.lcd.setBacklight(0x2);
+		case 'g':
+			mobile.lcd.setBacklight(col_green);
 			break;
-		case 't': //teal
-			mobile.lcd.setBacklight(0x6);
+		case 't':
+			mobile.lcd.setBacklight(col_teal);
 			break;
-		case 'b': //blue
-			mobile.lcd.setBacklight(0x4);
+		case 'b':
+			mobile.lcd.setBacklight(col_blue);
 			break;
-		case 'v': //violet
-			mobile.lcd.setBacklight(0x5);
+		case 'v':
+			mobile.lcd.setBacklight(col_violet);
 			break;
-		case 'w': //white
-			mobile.lcd.setBacklight(0x7);
+		case 'w':
+			mobile.lcd.setBacklight(col_white);
 			break;
 
-		case 'o': //off
+		case 'o':
 		default:
-			mobile.lcd.setBacklight(0x0);
+			mobile.lcd.setBacklight(col_off);
 	}
 	mobile.override_light = true;
 }
@@ -364,6 +361,8 @@ void mobile_cmd_quicktext()
 	printf("Text: <%s>\n", text);
 	mobile.lcd.setCursor(0, 0);
 	mobile.lcd.print("                ");
+	mobile.lcd.setCursor(0, 1);
+	mobile.lcd.print("                ");
 	mobile.lcd.setCursor(0, 0);
 	mobile.lcd.print(text);
 }
@@ -386,23 +385,6 @@ void mobile_cmd_clear()
 		default:
 			printf("Clear all\n");
 			mobile.lcd.clear();
-	}
-}
-
-void mobile_cmd_scroll()
-{
-	char arg = rx_buf[2];
-	switch (arg)
-	{
-		case 'a':
-			printf("Autoscroll on\n");
-			mobile.lcd.autoscroll();
-			break;
-		case 'b':
-		default:
-			printf("Autoscroll off\n");
-			mobile.lcd.noAutoscroll();
-			break;
 	}
 }
 

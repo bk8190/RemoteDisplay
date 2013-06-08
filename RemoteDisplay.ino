@@ -30,21 +30,19 @@ const int led_pin = 13;
 int led = false;
 
 // Radio pipe addresses for the 2 nodes to communicate.
-const uint64_t pipes[2] = { 
-  0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
 // The various roles supported by this sketch
 typedef enum { 
   role_base = 1, role_mobile = 2} 
-role_e;
+role_t;
 
 // The debug-friendly names of those roles
 const char* role_friendly_name[] = { 
   "invalid", "Base station", "Mobile"};
 
 // The role of the current running sketch
-role_e role;
-
+role_t role;
 
 
 #define PAYLOAD_SIZE 32
@@ -63,16 +61,12 @@ tx_payload_t;
 
 typedef enum 
 {
-  CMD_ECHO         = 'e',
   CMD_HEARTBEAT    = 'h',
-
   CMD_TEXT         = 't', //argc 1: row [a,b]  argc2: col [a,p]  argstring: text (max 16)
-  CMD_QUICKTEXT    = 'u',
+  CMD_QUICKTEXT    = 'u', //argstring: text
   CMD_CLEAR        = 'c', //argc: row [a,b] (default clear all)
   CMD_BACKLIGHT    = 'l',
-  CMD_DISPLAY      = 'd', 
-  CMD_SCROLL       = 's', //argc: mode [a,b]
-  CMD_BUTTON       = 'b',
+
   CMD_TIMEOUT      = 't',
 } 
 command_t;
@@ -153,7 +147,7 @@ void loop(void)
 #define MOBILE_SLEEP_INTERVAL 3000
 #define MOBILE_WAKE_INTERVAL 500
 
-#define BASE_RX_TIMEOUT 500
+#define BASE_RX_TIMEOUT 750
 #define BASE_TX_TIMEOUT 12000
 #define BASE_TX_RETRY_INTERVAL 50
 #define BASE_MAX_TX_RETRIES (BASE_TX_TIMEOUT/BASE_TX_RETRY_INTERVAL)
@@ -163,8 +157,5 @@ void loop(void)
 #define MOBILE_MAX_TX_RETRIES (MOBILE_TX_TIMEOUT/MOBILE_TX_RETRY_INTERVAL)
 
 
-
-
 #include "base.h"
 #include "mobile.h"
-
