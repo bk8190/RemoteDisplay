@@ -69,19 +69,20 @@ void setup_mobile()
 {
 	mobile.lcd = Adafruit_RGBLCDShield();
 	mobile.lcd.begin(16,2);
-	mobile.lcd.print("Hello!   " __DATE__);
-	mobile.lcd.setCursor(0,1);
-	mobile.lcd.print( __TIME__);
 	mobile.lcd.enableButtonInterrupt();
 
-	delay(500);
+	mobile.lcd.print("Hello!    " __DATE__);
+	mobile.lcd.setCursor(0,1);
+	mobile.lcd.print(__TIME__);
+
+	delay(1000);
 	mobile.lcd.setBacklight(0);
+
 	mobile.needs_send_status = false;
 	mobile.needs_tx          = false;
 	mobile.override_light    = false;
 	mobile.interrupted       = false;
 	pinMode(led_pin, OUTPUT);
-	delay(2000);
 }
 
 void loop_mobile()
@@ -233,18 +234,17 @@ void mobile_read_voltage()
 
 	if (mobile.last_voltage < MOBILE_LOW_VOLTAGE && mobile.last_voltage > 3.0)
 	{
-		mobile.lcd.setBacklight(col_off);
-		
 		mobile.lcd.setCursor(0, 0);
 		mobile.lcd.print("BATTERY LOW,");
 		mobile.lcd.setCursor(0, 1);
 		mobile.lcd.print("UNPLUG NOW!");
 
+		mobile.lcd.setBacklight(col_off);
 		radio.powerDown();
 
 		delay(1000);
 		detachInterrupt(isr);
-		//LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
+		LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
 	}
 }
 
