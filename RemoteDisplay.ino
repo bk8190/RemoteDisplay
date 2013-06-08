@@ -12,6 +12,7 @@ Based on Example RF Radio Ping Pair by J. Coliz <maniacbug@ymail.com>
 #include <SPI.h>
 #include <cstring>
 #include "nRF24L01.h"
+#include "LowPower.h"
 #include "RF24.h"
 #include "printf.h"
 
@@ -24,7 +25,9 @@ RF24 radio(9,10);
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
 // Leave open to be the 'ping' transmitter
-const int role_pin = 7;
+const int role_pin = 6;
+const int led_pin = 13;
+int led = false;
 
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 
@@ -106,7 +109,8 @@ void setup(void)
   radio.begin();
 
   // optionally, increase the delay between retries & # of retries
-  radio.setRetries(15,15);
+  radio.setRetries(3,15);
+  //radio.setRetries(15,15);
   radio.setPayloadSize(32);
 
   // Open pipes to other nodes for communication
@@ -150,7 +154,7 @@ void loop(void)
 #define MOBILE_WAKE_INTERVAL 500
 
 #define BASE_RX_TIMEOUT 500
-#define BASE_TX_TIMEOUT 5000
+#define BASE_TX_TIMEOUT 12000
 #define BASE_TX_RETRY_INTERVAL 50
 #define BASE_MAX_TX_RETRIES (BASE_TX_TIMEOUT/BASE_TX_RETRY_INTERVAL)
 

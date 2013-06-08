@@ -22,19 +22,19 @@ void setup_base()
 
 void loop_base()
 {
-  // If we don't have a complete message, try reading from the serial port
+	// If we don't have a complete message, try reading from the serial port
 	if (!base.tx_buf_full)
 	{
 		base_serial_input();
 	}
 
-  // If we have a complete message in our buffer, try to send it.
+	// If we have a complete message in our buffer, try to send it.
 	if (base.tx_buf_full)
 	{
 		base_tx();
 	}
 
-  // See if the mobile sent us a response
+	// See if the mobile sent us a response
 	base_rx();
 }
 
@@ -135,14 +135,14 @@ void base_rx()
 
 	while (!timeout)
 	{
-	  // Wait here until we get a response, or timeout
+		// Wait here until we get a response, or timeout
 		while ( ! radio.available() && ! timeout )
 		{
 			if (millis() - started_waiting_at > BASE_RX_TIMEOUT )
 				timeout = true;
 		}
 
-	  // Grab the response
+		// Grab the response
 		if(!timeout )
 		{
 			radio.read( rx_buf, PAYLOAD_SIZE );
