@@ -1,5 +1,5 @@
 
-#define MOBILE_CELL_VOLTAGE_PIN 0
+#define MOBILE_CELL_VOLTAGE_PIN 5
 
 #define MOBILE_WAKE_PIN 2
 
@@ -53,7 +53,6 @@ void mobile_wake()
 	Serial.println("ISR!!!!!");
 	detachInterrupt(isr);
 	mobile.interrupted = true;
-	delay(200);
 }
 
 void mobile_rx();
@@ -62,22 +61,24 @@ void mobile_delay();
 void mobile_read_voltage();
 void mobile_cmd_heartbeat();
 void mobile_read_buttons();
+void mobile_tx_buffer();
 
 void setup_mobile()
 {
 	mobile.lcd = Adafruit_RGBLCDShield();
 	mobile.lcd.begin(16,2);
-	mobile.lcd.setBacklight(0);
-	mobile.lcd.print("Hello!");
+	mobile.lcd.print("Hello!   " __DATE__);
+	mobile.lcd.setCursor(0,1);
+	mobile.lcd.print( __TIME__);
 	mobile.lcd.enableButtonInterrupt();
+
+	delay(500);
+	mobile.lcd.setBacklight(0);
 	mobile.needs_send_status = false;
 	mobile.needs_tx = false;
 	mobile.override_light = false;
-	pinMode(led_pin, OUTPUT);
-	pinMode(0, INPUT);
-	pinMode(1, INPUT);
-
 	mobile.interrupted = false;
+	pinMode(led_pin, OUTPUT);
 	delay(2000);
 }
 
@@ -86,14 +87,6 @@ void loop_mobile()
 	int i;
 	bool done = false;
 
-
-	if (mobile.interrupted)
-	{
-		//mobile.lcd.setBacklight(0x01);
-		//delay(200);
-		//mobile.lcd.setBacklight(0x00);
-		mobile.interrupted = false;
-	}
 	digitalWrite(led_pin, 1);
 
 	mobile_read_buttons();
@@ -107,33 +100,27 @@ void loop_mobile()
 	}
 	else
 	{
-		Serial.println("Going sleepy");
-
 		radio.powerDown();
-
 		digitalWrite(led_pin, 0);
-		//Serial.end();
 		attachInterrupt(isr, mobile_wake, LOW);
+
 		LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
-		//delay(2000);
-  		//Serial.begin(57600);
-		digitalWrite(led_pin, 1);
+
 		detachInterrupt(isr);
+		digitalWrite(led_pin, 1);
 	}
 
-	Serial.println("ok");
 	// Try to read a packet
 	radio.startListening();
 
 	if (!mobile.interrupted)
 		delay(MOBILE_WAKE_INTERVAL); // TODO: make this sleep?
-
+	mobile.interrupted = false;
 }
 
 void mobile_rx()
 {
-	int try_num, i; 
-	bool ok, done = false;
+	bool done = false;
 
 	// Process the payloads until we've gotten everything
 	while (!done)
@@ -158,33 +145,39 @@ void mobile_rx()
 			mobile_process_command();
 		}
 
-/*
+
 		if (!mobile.needs_tx)
 		{
-			mobile_cmd_heartbeat();
+		//	mobile_cmd_heartbeat();
 		}
-*/
-		if (mobile.needs_tx)
-		{
-			delay(100);
-			// Send the response back.
-			for (try_num=1; try_num<MOBILE_MAX_TX_RETRIES; try_num++)
-			{
-				radio.stopListening();
-				ok = radio.write( tx_buf, PAYLOAD_SIZE );
-				radio.startListening();
 
-				//printf("send attempt %u: failed\n\r", try_num);
-				delay(MOBILE_TX_RETRY_INTERVAL); // TODO: make this sleep?
-				if (ok)
-					break;
-			}
-			mobile.needs_tx = false;
-			printf("Sent response, try %u.\n\r", try_num);
-		}
+		if (mobile.needs_tx)
+			mobile_tx_buffer();
+
 		delay(200);
 	}
 
+}
+
+void mobile_tx_buffer()
+{
+	int try_num;
+	bool ok;
+	delay(100);
+	// Send the response back.
+	for (try_num=1; try_num<MOBILE_MAX_TX_RETRIES; try_num++)
+	{
+		radio.stopListening();
+		ok = radio.write( tx_buf, PAYLOAD_SIZE );
+		radio.startListening();
+
+		//printf("send attempt %u: failed\n\r", try_num);
+		delay(MOBILE_TX_RETRY_INTERVAL); // TODO: make this sleep?
+		if (ok)
+			break;
+	}
+	mobile.needs_tx = false;
+	printf("Sent response, try %u.\n\r", try_num);
 }
 
 void mobile_read_buttons()
@@ -213,6 +206,7 @@ void mobile_read_buttons()
 			mobile.needs_send_status = 5;
 		}
 
+		mobile.lcd.clear();
 		mobile.lcd.setCursor(0,0);
 		mobile.lcd.print(status_msgs[mobile.needs_send_status]);
 		mobile.lcd.setBacklight(status_colors[mobile.needs_send_status]);
@@ -359,10 +353,7 @@ void mobile_cmd_quicktext()
 	}
 
 	printf("Text: <%s>\n", text);
-	mobile.lcd.setCursor(0, 0);
-	mobile.lcd.print("                ");
-	mobile.lcd.setCursor(0, 1);
-	mobile.lcd.print("                ");
+	mobile.lcd.clear();
 	mobile.lcd.setCursor(0, 0);
 	mobile.lcd.print(text);
 }

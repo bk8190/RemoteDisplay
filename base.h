@@ -17,7 +17,7 @@ void base_rx();
 
 void setup_base()
 {
-	Serial.write("base_setup");
+	Serial.println("base_setup");
 }
 
 void loop_base()
@@ -116,7 +116,6 @@ void base_tx()
 
 	if (ok)
 	{
-		//printf("send attempt %u: YOLO\n\r", try_num);
 		base_reset_parsing();
 		memset(tx_buf, 0, sizeof(tx_buf));
 	}

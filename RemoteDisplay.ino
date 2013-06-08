@@ -96,7 +96,9 @@ void setup(void)
 
   Serial.begin(57600);
   printf_begin();
-  printf("\n\rRemoteDisplay\n\r");
+  Serial.println();
+  Serial.println("RemoteDisplay");
+  Serial.println("Built: " __DATE__ " " __TIME__ );
   printf("ROLE: %s\n\r",role_friendly_name[role]);
 
   // Setup and configure rf radio
@@ -152,7 +154,7 @@ void loop(void)
 #define BASE_TX_RETRY_INTERVAL 50
 #define BASE_MAX_TX_RETRIES (BASE_TX_TIMEOUT/BASE_TX_RETRY_INTERVAL)
 
-#define MOBILE_TX_TIMEOUT 5000
+#define MOBILE_TX_TIMEOUT 1000
 #define MOBILE_TX_RETRY_INTERVAL 50
 #define MOBILE_MAX_TX_RETRIES (MOBILE_TX_TIMEOUT/MOBILE_TX_RETRY_INTERVAL)
 
