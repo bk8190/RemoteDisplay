@@ -67,6 +67,21 @@ void base_serial_input()
 	while (base.got_start_delim && Serial.available())
 	{
 		b = Serial.read();
+
+		if (b < ' ' || b > '~')
+		{
+			printf("Bad chr %u\r\n", b);
+			base_reset_parsing();
+			break;
+		}
+
+		if (b == BEGIN_DELIM)
+		{
+			Serial.println("Repeat open delim");
+			base_reset_parsing();
+			break;
+		}
+
 		tx_buf[base.tx_buf_offset++] = b;
 		if (b == END_DELIM)
 		{
@@ -76,7 +91,7 @@ void base_serial_input()
 
 		if (base.tx_buf_offset == PAYLOAD_SIZE)
 		{
-			printf("ERROR: parsing buffer overflow");
+			Serial.println("ERROR: parsing buffer overflow");
 			base_reset_parsing();
 			break;
 		}
@@ -121,7 +136,7 @@ void base_tx()
 	}
 	else
 	{
-		printf("Send failed. <t>\n\r");
+		Serial.println("Send failed. <t>");
 	}
 }
 

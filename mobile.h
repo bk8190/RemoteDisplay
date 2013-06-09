@@ -180,7 +180,7 @@ void mobile_tx_buffer()
 			break;
 	}
 	mobile.needs_tx = false;
-	printf("Sent response, try %u.\n\r", try_num);
+	printf("Sent response, try %u.\r\n", try_num);
 }
 
 void mobile_read_buttons()
@@ -228,7 +228,7 @@ void mobile_read_voltage()
 	tmp[4] = 'v';
 	tmp[5] = '\0';
 
-	printf("v = %s\n", tmp);
+	printf("v = %s\r\n", tmp);
 	mobile.lcd.setCursor(12,1);
 	mobile.lcd.print(tmp);
 
@@ -288,7 +288,7 @@ void mobile_process_command()
 
 void mobile_cmd_backlight()
 {
-	printf("Setting backlight '%c'\n", rx_buf[2]);
+	printf("Setting backlight '%c'\r\n", rx_buf[2]);
 	switch (rx_buf[2])
 	{
 		case 'r':
@@ -336,7 +336,7 @@ void mobile_cmd_text()
 		text[i-4] = rx_buf[i];
 	}
 
-	printf("Text line %u, col %u: <%s>\n", line, col, text);
+	printf("Text line %u, col %u: <%s>\r\n", line, col, text);
 	mobile.lcd.setCursor(col, line);
 	mobile.lcd.print(text);
 }
@@ -354,7 +354,7 @@ void mobile_cmd_quicktext()
 		text[i-2] = rx_buf[i];
 	}
 
-	printf("Text: <%s>\n", text);
+	printf("Text: <%s>\r\n", text);
 	mobile.lcd.clear();
 	mobile.lcd.setCursor(0, 0);
 	mobile.lcd.print(text);
@@ -366,24 +366,24 @@ void mobile_cmd_clear()
 	switch (arg)
 	{
 		case 'a':
-			printf("Clear line 1\n");
+			Serial.println("Clear line 1");
 			mobile.lcd.setCursor(0,0);
 			mobile.lcd.print("                ");
 			break;
 		case 'b':
-			printf("Clear line 2\n");
+			Serial.println("Clear line 2");
 			mobile.lcd.setCursor(0,1);
 			mobile.lcd.print("                ");
 			break;
 		default:
-			printf("Clear all\n");
+			Serial.println("Clear all");
 			mobile.lcd.clear();
 	}
 }
 
 void mobile_cmd_heartbeat()
 {
-	printf("Heartbeat\n");
+	Serial.println("Heartbeat");
 	int pos=0;
 
 	memset(rx_buf, 0, PAYLOAD_SIZE+1);
